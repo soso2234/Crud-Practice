@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vam.mapper.FreeboardMapper">
+
+<!-- 자유게시판 등록 -->
+<insert id="freeboardAdd">
+
+	<selectKey resultType="int" keyProperty="freeboard_seq" order="AFTER">
+		
+		select 
+			max(freeboard_seq)
+		from freeboard
+		
+	</selectKey>
+	
+	insert into freeboard
+	(
+		  title
+		, conts
+		, reg_id
+		, reg_nm
+	)
+	values
+	(
+		  #{title}
+		, #{conts}
+		, #{reg_id}
+		, #{reg_nm}
+	)
+
+</insert>
+
+<!-- 자유게시판 리스트 -->
+<select id="freeboardGetList" resultType="com.vam.model.FreeboardVO">
+	SELECT 
+		  freeboard_seq
+		, title
+		, conts
+		, reg_id
+		, reg_nm
+		, reg_dt
+		, del_id
+		, del_dt
+		, del_yn
+		, update_dt 
+	FROM freeboard
+	WHERE 1=1
+	AND del_yn = 'N'
+	 <if test="keyword != null">
+	      AND title like concat('%',#{keyword}, '%')
+	  </if>
+	ORDER by freeboard_seq desc 
+	limit #{skip}, #{amount}
+</select>
+
+<!-- 자유게시판 총 갯수 -->
+<select id="freeboardGetTotal" resultType="int">
+	
+	select 
+		count(*) 
+	from freeboard
+	where 1=1
+	and del_yn = 'N'
+	<if test="keyword != null">
+	
+		and title like concat('%' , #{keyword}, '%')
+	
+	</if>
+	
+</select>
+
+<!-- 자유게시판 상세 페이지 -->
+<select id="freeboardGetDetail" resultType="com.vam.model.FreeboardVO">
+
+	select 
+		* 
+	from freeboard 
+	where 1=1
+	and freeboard_seq = #{freeboard_seq}
+ 	
+</select>
+
+<!-- 자유게시판 수정 -->
+<update id="freeboardModify">
+	update
+		freeboard
+	set
+		  title = #{title}
+		, conts = #{conts}
+		, update_dt = now()
+	where 1=1
+	and freeboard_seq = #{freeboard_seq}
+</update>
+
+<!-- 자유게시판 삭제 -->
+<delete id="freeboardDelete">
+	update 
+		freeboard
+	set 
+		  del_yn = 'Y'
+		, del_dt = now()
+		, del_id = #{del_id}
+	where 1=1
+	and freeboard_seq = #{freeboard_seq}
+</delete>
+
+<!-- 첨부파일 등록 -->
+<insert id="uploadEnroll">
+
+	insert into uploadfile
+	(
+		  freeboard_seq
+		, fileName
+		, uuid
+	)
+	values
+	(
+		  #{freeboard_seq}
+		, #{fileName}
+		, #{uuid}
+	)
+	
+</insert>
+
+</mapper>

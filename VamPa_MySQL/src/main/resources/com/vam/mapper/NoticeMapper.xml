@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vam.mapper.NoticeMapper">
+
+	<!-- criteria(검색조건) -->
+	<sql id="criteria">
+	    <if test="keyword != null">
+			and (title like concat ('%', #{keyword}, '%'))
+	    </if>
+	</sql>
+	
+	<!-- 공지사항 목록 -->
+	<select id="noticeList" resultType="com.vam.model.NoticeAddVO">
+	
+			select  
+				  notice_seq
+				, title
+				, conts
+				, reg_id
+				, reg_nm
+				, reg_dt
+	        	, del_id
+	        	, del_dt
+	        	, del_yn
+			from notice
+			where 1=1
+			and del_yn = 'N'
+			<include refid="criteria"></include>
+			order by notice_seq desc 
+			limit #{skip}, #{amount}	
+	
+	</select>
+	
+	<!-- 공지사항 총 개수 -->
+	<select id="noticeTotal" resultType="int">
+	
+  		select 
+  			count(*) 
+  		from notice
+  		where 1=1
+  		and del_yn = 'N'
+		<include refid="criteria"></include>
+		
+	</select>
+
+	<!-- 공지사항 디테일 페이지 -->
+  	<select id="noticeDetail" resultType="com.vam.model.NoticeAddVO">
+  	
+  		select 
+  			* 
+  		from notice 
+  		where 1=1
+  		and notice_seq = #{notice_seq}
+  	
+  	</select>
+</mapper>
